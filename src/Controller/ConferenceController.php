@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\Conference;
+use App\Form\CommentFormType;
 use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,10 +18,12 @@ use Twig\Environment;
 class ConferenceController extends AbstractController
 {
     private $twig;
+    private $entityManager;
 
-    public function __construct(Environment $twig)
+    public function __construct(Environment $twig, EntityManagerInterface $entityManager)
     {
         $this->twig = $twig;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/', name: 'homepage')]
@@ -31,11 +37,43 @@ class ConferenceController extends AbstractController
 
     /*
     コメントを一覧表示する専用のページ
-    id: データベースのconferenceテーブルのプライマリーキー
+    id: データベースのconferenceテーブルのプライマリーキー => slugに変更
     */
-    #[Route('/conference/{id}', name: 'conference')]
-    public function show(Request $request, Conference $conference, CommentRepository $commentRepository): Response
-    {
+    #[Route('/conference/{slug}', name: 'conference')]
+    public function show(
+        Request $request,
+        Conference $conference,
+        CommentRepository $commentRepository,
+        string $photoDir
+    ): Response {
+        $comment = new Comment();
+        // フォームタイプを直接生成してはいけない => createForm()
+        $form = $this->createForm(CommentFormType::class, $comment);
+        // フォームを送信してコントローラーでデータベースに情報を永続化
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setConference($conference);
+            /*
+            アップロードされた写真をカンファレンスページで表示できるように，
+            Webからアクセスできるローカルのディスクに保存
+            */
+            if ($photo = $form['photo']->getData()) {
+                // ファイルにランダムな名前をつける
+                $filename = bin2hex(random_bytes(6)).'.'.$photo->guessExtension();
+                try {
+                    $photo->move($photoDir, $filename);
+                } catch (FileException $e) {
+                    // unable to upload the photo, give up
+                }
+                $comment->setPhotoFilename($filename);
+            }
+
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
+        }
+
         // リクエストのクエリー文字列($request->query)からoffsetを整数として(getInt())取得
         $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $commentRepository->getCommentPaginator($conference, $offset);
@@ -45,6 +83,7 @@ class ConferenceController extends AbstractController
             'comments' => $paginator,
             'previous' => $offset - CommentRepository::PAGINATOR_PER_PAGE,
             'next' => min(count($paginator), $offset + CommentRepository::PAGINATOR_PER_PAGE),
+            'comment_form' => $form->createView(),
         ]));
     }
 }

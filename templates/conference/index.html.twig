@@ -1,3 +1,4 @@
+{# ルートページ #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Conference Guestbook{% endblock %}
@@ -16,7 +17,7 @@
     <h4>{{ conference }}</h4>
     <p>
       {# path()関数はルート名からページパスを生成 #}
-      <a href="{{ path('conference', { id: conference.id }) }}">View</a>
+      <a href="{{ path('conference', { slug: conference.slug }) }}">View</a>
     </p>
   {% endfor %}
 {% endblock %}
