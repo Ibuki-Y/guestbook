@@ -1,3 +1,4 @@
+{# コメント一覧ページ #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Conference Guestbook - {{ conference }}{% endblock %}
@@ -31,4 +32,8 @@
   {% else %}
     <div>No comments have been posted yet for this conference.</div>
   {% endif %}
+
+  <h2>Add your own feedback</h2>
+
+  {{ form(comment_form) }}
 {% endblock %}
