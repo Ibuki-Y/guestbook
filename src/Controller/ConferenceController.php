@@ -31,9 +31,9 @@ class ConferenceController extends AbstractController
 
     /*
     コメントを一覧表示する専用のページ
-    id: データベースのconferenceテーブルのプライマリーキー
+    id: データベースのconferenceテーブルのプライマリーキー => slugに変更
     */
-    #[Route('/conference/{id}', name: 'conference')]
+    #[Route('/conference/{slug}', name: 'conference')]
     public function show(Request $request, Conference $conference, CommentRepository $commentRepository): Response
     {
         // リクエストのクエリー文字列($request->query)からoffsetを整数として(getInt())取得
