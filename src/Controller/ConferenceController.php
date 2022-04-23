@@ -53,7 +53,6 @@ class ConferenceController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $comment->setConference($conference);
-            
             /*
             アップロードされた写真をカンファレンスページで表示できるように，
             Webからアクセスできるローカルのディスクに保存
