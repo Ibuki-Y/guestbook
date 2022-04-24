@@ -48,6 +48,8 @@ class CommentCrudController extends AbstractCrudController
             ->setBasePath('/uploads/photos')
             ->setLabel('Photo')
             ->onlyOnIndex();
+        // コメントの状態(state)表示
+        yield TextField::new('state');
 
         $createdAt = DateTimeField::new('createdAt')->setFormTypeOptions([
             'html5' => true,
