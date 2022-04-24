@@ -38,12 +38,12 @@ class SpamChecker
                 'is_test' => true,
             ]),
         ]);
+
         /*
         2: コメントが"露骨なスパム", akismet-guaranteed-spam@example.com
         1: コメントがスパムの可能性がある
         0: コメントがスパムでない
         */
-
         $headers = $response->getHeaders();
         if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) {
             return 2;
