@@ -36,10 +36,27 @@ class ConferenceController extends AbstractController
     #[Route('/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
-        return new Response($this->twig->render('conference/index.html.twig', [
+        // 1時間(3600s)キャッシュ
+        $response = new Response($this->twig->render('conference/index.html.twig', [
             // Conferenceオブジェクトのリストをconferences変数として渡す
             'conferences' => $conferenceRepository->findAll(),
         ]));
+        // setSharedMaxAge(): リバースプロキシのキャッシュ有効期限
+        $response->setSharedMaxAge(3600);
+
+        return $response;
+    }
+
+    // カンファレンス情報のHTMLの一部のみを返すコントローラー
+    #[Route('/conference_header', name: 'conference_header')]
+    public function conferenceHeader(ConferenceRepository $conferenceRepository): Response
+    {
+        $response = new Response($this->twig->render('conference/header.html.twig', [
+            'conferences' => $conferenceRepository->findAll(),
+        ]));
+        $response->setSharedMaxAge(3600);
+
+        return $response;
     }
 
     /*
