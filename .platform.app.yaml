@@ -8,6 +8,7 @@ dependencies:
 
 runtime:
   extensions:
+    - amqp
     - apcu
     - blackfire
     - ctype
@@ -40,6 +41,7 @@ mounts:
 relationships:
   database: "database:postgresql"
   redis: "rediscache:redis"
+  rabbitmq: "queue:rabbitmq"
 
 hooks:
   build: |
