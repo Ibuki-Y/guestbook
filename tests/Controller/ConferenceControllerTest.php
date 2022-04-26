@@ -17,7 +17,7 @@ class ConferenceControllerTest extends PantherTestCase
     {
         // ブラウザをシミュレート
         $client = static::createPantherClient(['external_base_uri' => $_SERVER['SYMFONY_PROJECT_DEFAULT_ROUTE_URL']]);
-        $client->request('GET', '/');
+        $client->request('GET', '/en/');
         /*
         クライアントとサーバーの間の往復をしないので処理が速くなる
         各HTTPリクエストの後のサービスの状態を調べるテストが可能
@@ -30,7 +30,7 @@ class ConferenceControllerTest extends PantherTestCase
     public function testCommentSubmission()
     {
         $client = static::createClient();
-        $client->request('GET', '/conference/amsterdam-2019');
+        $client->request('GET', '/en/conference/amsterdam-2019');
         $client->submitForm('Submit', [
             'comment_form[author]' => 'Fabien',
             'comment_form[text]' => 'Some feedback from an automated functional test',
@@ -56,7 +56,7 @@ class ConferenceControllerTest extends PantherTestCase
         // ホームページを開く
         $client = static::createClient();
         // ページ内の要素を探すのに便利なCrawlerインスタンスを返す
-        $crawler = $client->request('GET', '/');
+        $crawler = $client->request('GET', '/en/');
 
         // CSSセレクターを使って，ホームページにカンファレンスが2つ表示されているのを確認
         $this->assertCount(2, $crawler->filter('h4'));
@@ -69,6 +69,6 @@ class ConferenceControllerTest extends PantherTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h2', 'Amsterdam 2019');
         // ページにコメントが1つあることをアサート
-        $this->assertSelectorExists('div:contains("There are 1 comments")');
+        $this->assertSelectorExists('div:contains("There is one comment")');
     }
 }

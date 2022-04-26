@@ -36,7 +36,15 @@ class ConferenceController extends AbstractController
         $this->bus = $bus;
     }
 
-    #[Route('/', name: 'homepage')]
+    // /en/にリダイレクト
+    #[Route('/')]
+    public function indexNoLocale(): Response
+    {
+        return $this->redirectToRoute('homepage', ['_locale' => 'en']);
+    }
+
+    // URLを国際化
+    #[Route('/{_locale<%app.supported_locales%>}/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
         // 1時間(3600s)キャッシュ
@@ -51,7 +59,7 @@ class ConferenceController extends AbstractController
     }
 
     // カンファレンス情報のHTMLの一部のみを返すコントローラー
-    #[Route('/conference_header', name: 'conference_header')]
+    #[Route('/{_locale<%app.supported_locales%>}/conference_header', name: 'conference_header')]
     public function conferenceHeader(ConferenceRepository $conferenceRepository): Response
     {
         $response = new Response($this->twig->render('conference/header.html.twig', [
@@ -66,7 +74,7 @@ class ConferenceController extends AbstractController
     コメントを一覧表示する専用のページ
     id: データベースのconferenceテーブルのプライマリーキー => slugに変更
     */
-    #[Route('/conference/{slug}', name: 'conference')]
+    #[Route('/{_locale<%app.supported_locales%>}/conference/{slug}', name: 'conference')]
     public function show(
         Request $request,
         Conference $conference,
@@ -107,7 +115,7 @@ class ConferenceController extends AbstractController
                 'permalink' => $request->getUri(),
             ];
 
-            // レビューURL 
+            // レビューURL
             $reviewUrl = $this->generateUrl(
                 'review_comment',
                 ['id' => $comment->getId()],
